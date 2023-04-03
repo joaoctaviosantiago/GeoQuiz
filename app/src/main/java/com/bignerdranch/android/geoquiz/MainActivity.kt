@@ -2,16 +2,12 @@ package com.bignerdranch.android.geoquiz
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
 import android.widget.Toast
 import com.bignerdranch.android.geoquiz.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
-    private lateinit var trueButton: Button
-    private lateinit var falseButton: Button
 
     private val questionBank = listOf(
         Question(R.string.question_brazil, false),
