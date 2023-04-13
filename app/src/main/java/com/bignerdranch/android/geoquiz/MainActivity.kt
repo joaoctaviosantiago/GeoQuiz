@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import com.bignerdranch.android.geoquiz.databinding.ActivityMainBinding
 import java.text.DecimalFormat
 
@@ -13,26 +14,20 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val questionBank = listOf(
-        Question(R.string.question_brazil, false),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_africa, false),
-        Question(R.string.question_america, true),
-        Question(R.string.question_asia, true),
-    )
-    private var currentIndex = 0
-    private var grade = 0.0
-    private var answered = mutableListOf<Int>()
+    private val quizViewModel: QuizViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         Log.d(TAG, "onCreate(Bundle?) called")
+        Log.d(TAG, "Got a QuizViewModel: $quizViewModel")
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.questionTextView.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
         }
 
@@ -46,30 +41,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.previousButton.setOnClickListener {
-            currentIndex = if (currentIndex == 0) {
-                questionBank.size - 1
-            } else {
-                (currentIndex - 1) % questionBank.size
-            }
+            quizViewModel.moveToPrevious()
             updateQuestion()
             isAnswered()
-
-            if (answered.size == questionBank.size) {
-                score()
-            }
+            score()
         }
 
         binding.nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
             isAnswered()
-
-            if (answered.size == questionBank.size) {
-                score()
-            }
+            score()
         }
 
         updateQuestion()
+        isAnswered()
 
     }
 
@@ -100,27 +86,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateQuestion() {
 //      getting question ID from resources>string
-        val questionTextResId = questionBank[currentIndex].textResId
+        val questionTextResId = quizViewModel.currentQuestionText
 
 //      binding it to the textview
         binding.questionTextView.setText(questionTextResId)
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        val correctAnswer = questionBank[currentIndex].answer
+        val correctAnswer = quizViewModel.currentQuestionAnswer
         val messageResId: Int
 
 //      accessing the message's id from resources>string
 //      passing it to the toast afterwards
         if (userAnswer == correctAnswer) {
             messageResId = R.string.correct_toast
-            grade += 1
+            quizViewModel.grade += 1
         } else {
             messageResId = R.string.incorrect_toast
         }
 
 //      adding answered question to the answered mutable list
-        answered.add(currentIndex)
+        quizViewModel.answered.add(quizViewModel.currentIndex)
 
 //      making toast with the text from the string folder
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
@@ -129,7 +115,7 @@ class MainActivity : AppCompatActivity() {
     private fun isAnswered() {
 
 //      deactivating or activating buttons if the question has been answered
-        if (currentIndex in answered) {
+        if (quizViewModel.currentIndex in quizViewModel.answered) {
             binding.trueButton.isEnabled = false
             binding.falseButton.isEnabled = false
         } else {
@@ -141,14 +127,16 @@ class MainActivity : AppCompatActivity() {
     private fun score() {
 
 //      calculating score and formatting it
-        val finalScore = grade * (100.0/6)
+        val finalScore = quizViewModel.grade * (100.0/6)
         val formatting = DecimalFormat("#.##")
 
-//      displaying the toast with the message after
-        Toast.makeText(
-            this,
-            "You've answered ${formatting.format(finalScore)}% of the questions correctly!",
-            Toast.LENGTH_LONG
-        ).show()
+        if (quizViewModel.answered.size == quizViewModel.questionBank.size) {
+            //      displaying the toast with the message after
+            Toast.makeText(
+                this,
+                "You've answered ${formatting.format(finalScore)}% of the questions correctly!",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 }
