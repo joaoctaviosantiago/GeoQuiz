@@ -33,29 +33,24 @@ class MainActivity : AppCompatActivity() {
 
         binding.trueButton.setOnClickListener {
             checkAnswer(true)
-            isAnswered()
         }
         binding.falseButton.setOnClickListener {
             checkAnswer(false)
-            isAnswered()
         }
 
         binding.previousButton.setOnClickListener {
             quizViewModel.moveToPrevious()
             updateQuestion()
-            isAnswered()
             score()
         }
 
         binding.nextButton.setOnClickListener {
             quizViewModel.moveToNext()
             updateQuestion()
-            isAnswered()
             score()
         }
 
         updateQuestion()
-        isAnswered()
 
     }
 
@@ -90,6 +85,9 @@ class MainActivity : AppCompatActivity() {
 
 //      binding it to the textview
         binding.questionTextView.setText(questionTextResId)
+
+//       check if the question has been answered
+        isAnswered()
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
@@ -107,6 +105,9 @@ class MainActivity : AppCompatActivity() {
 
 //      adding answered question to the answered mutable list
         quizViewModel.answered.add(quizViewModel.currentIndex)
+
+//       check if question has been answered
+        isAnswered()
 
 //      making toast with the text from the string folder
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()

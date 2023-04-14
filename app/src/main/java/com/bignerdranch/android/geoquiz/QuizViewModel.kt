@@ -22,6 +22,7 @@ class QuizViewModel(private val savedStateHandle: SavedStateHandle): ViewModel()
         set(value) = savedStateHandle.set(CURRENT_INDEX_KEY, value)
 
     var grade = 0.0
+
     var answered = mutableListOf<Int>()
 
     val currentQuestionAnswer: Boolean
