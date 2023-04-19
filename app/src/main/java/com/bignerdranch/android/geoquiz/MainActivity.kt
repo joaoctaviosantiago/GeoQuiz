@@ -41,17 +41,14 @@ class MainActivity : AppCompatActivity() {
         binding.previousButton.setOnClickListener {
             quizViewModel.moveToPrevious()
             updateQuestion()
-            score()
         }
 
         binding.nextButton.setOnClickListener {
             quizViewModel.moveToNext()
             updateQuestion()
-            score()
         }
 
         updateQuestion()
-
     }
 
     override fun onStart() {
@@ -86,58 +83,56 @@ class MainActivity : AppCompatActivity() {
 //      binding it to the textview
         binding.questionTextView.setText(questionTextResId)
 
-//       check if the question has been answered
-        isAnswered()
+        completed()
+
+        var answeredQuestions = 0
+
+        for (question in quizViewModel.questionBank) {
+            if (question.complete) {
+                answeredQuestions += 1
+            }
+            if (answeredQuestions == quizViewModel.questionBank.size) {
+                //      calculating score and formatting it
+                val finalScore = quizViewModel.currentScore * (100.0/6)
+                val formatting = DecimalFormat("#.##")
+
+                //      displaying the toast with the message after
+                Toast.makeText(
+                    this,
+                    "You've answered ${formatting.format(finalScore)}% of the questions correctly!",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        val correctAnswer = quizViewModel.currentQuestionAnswer
-        val messageResId: Int
 
-//      accessing the message's id from resources>string
-//      passing it to the toast afterwards
-        if (userAnswer == correctAnswer) {
-            messageResId = R.string.correct_toast
-            quizViewModel.grade += 1
-        } else {
-            messageResId = R.string.incorrect_toast
+        if (!quizViewModel.questionBank[quizViewModel.currentIndex].complete) {
+            val correctAnswer = quizViewModel.currentQuestionAnswer
+            val messageResId: Int
+            quizViewModel.questionBank[quizViewModel.currentIndex].complete = true
+
+            if (userAnswer == correctAnswer) {
+                messageResId = R.string.correct_toast
+                quizViewModel.currentScore += 1
+            } else {
+                messageResId = R.string.incorrect_toast
+            }
+
+            Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
         }
 
-//      adding answered question to the answered mutable list
-        quizViewModel.answered.add(quizViewModel.currentIndex)
-
-//       check if question has been answered
-        isAnswered()
-
-//      making toast with the text from the string folder
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
+        completed()
     }
 
-    private fun isAnswered() {
-
-//      deactivating or activating buttons if the question has been answered
-        if (quizViewModel.currentIndex in quizViewModel.answered) {
+    private fun completed() {
+        if (quizViewModel.questionBank[quizViewModel.currentIndex].complete) {
             binding.trueButton.isEnabled = false
             binding.falseButton.isEnabled = false
         } else {
             binding.trueButton.isEnabled = true
             binding.falseButton.isEnabled = true
-        }
-    }
-
-    private fun score() {
-
-//      calculating score and formatting it
-        val finalScore = quizViewModel.grade * (100.0/6)
-        val formatting = DecimalFormat("#.##")
-
-        if (quizViewModel.answered.size == quizViewModel.questionBank.size) {
-            //      displaying the toast with the message after
-            Toast.makeText(
-                this,
-                "You've answered ${formatting.format(finalScore)}% of the questions correctly!",
-                Toast.LENGTH_LONG
-            ).show()
         }
     }
 }

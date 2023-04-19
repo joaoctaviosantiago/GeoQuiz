@@ -5,25 +5,26 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 
 const val CURRENT_INDEX_KEY = "CURRENT_INDEX_KEY"
+const val CURRENT_SCORE_KEY = "CURRENT_SCORE_KEY"
 
 class QuizViewModel(private val savedStateHandle: SavedStateHandle): ViewModel() {
 
     val questionBank = listOf(
-        Question(R.string.question_brazil, false),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_africa, false),
-        Question(R.string.question_america, true),
-        Question(R.string.question_asia, true),
+        Question(R.string.question_brazil, answer=false, complete=false),
+        Question(R.string.question_oceans, answer=true, complete=false),
+        Question(R.string.question_mideast, answer=false, complete=false),
+        Question(R.string.question_africa, answer=false, complete=false),
+        Question(R.string.question_america, answer=true, complete=false),
+        Question(R.string.question_asia, answer=true, complete=false),
     )
 
     var currentIndex: Int
         get() = savedStateHandle[CURRENT_INDEX_KEY] ?: 0
         set(value) = savedStateHandle.set(CURRENT_INDEX_KEY, value)
 
-    var grade = 0.0
-
-    var answered = mutableListOf<Int>()
+    var currentScore: Double
+        get() = savedStateHandle[CURRENT_SCORE_KEY]  ?: 0.0
+        set(value) = savedStateHandle.set(CURRENT_SCORE_KEY, value)
 
     val currentQuestionAnswer: Boolean
         get() = questionBank[currentIndex].answer
